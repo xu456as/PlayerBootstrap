@@ -28,6 +28,10 @@ public class HttpServerUrlHandler extends SimpleChannelInboundHandler<FullHttpRe
         this.defaultHandler = defaultHandler;
     }
 
+    public HttpServerUrlHandler(){
+        this.defaultHandler = null;
+    }
+
     public HttpServerUrlHandler register(HttpMethod method, String uriPath, HttpRequestHandler handler){
         handlerMap.put(uriPath, handler);
         return this;
