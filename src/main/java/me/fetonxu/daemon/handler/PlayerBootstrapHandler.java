@@ -11,11 +11,16 @@ import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.spdy.SpdyHeaders;
 import me.fetonxu.netty.handler.HttpRequestHandler;
 import me.fetonxu.netty.handler.HttpServerUrlHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
 
 public class PlayerBootstrapHandler implements HttpRequestHandler {
+
+    private static final Logger logger = LoggerFactory.getLogger(PlayerBootstrapHandler.class);
+
     @Override
     public void get(ChannelHandlerContext ctx, HttpRequest request, Map<String, List<String>> queryStringMap) {
         System.out.println("Bootstrap a player");
@@ -40,7 +45,7 @@ public class PlayerBootstrapHandler implements HttpRequestHandler {
 //            ctx.writeAndFlush(fullHttpResponse);
         }catch (Exception e){
 //            ctx.writeAndFlush(HttpServerUrlHandler.RESPONSE_502);
-            e.printStackTrace();
+            logger.error(String.format("error: %s", e));
         }
 
     }
@@ -59,7 +64,7 @@ public class PlayerBootstrapHandler implements HttpRequestHandler {
 
 
         }catch (Exception e){
-            e.printStackTrace();
+            logger.error(String.format("error: %s", e));
         }
 
         ctx.writeAndFlush(HttpServerUrlHandler.RESPONSE_200);
