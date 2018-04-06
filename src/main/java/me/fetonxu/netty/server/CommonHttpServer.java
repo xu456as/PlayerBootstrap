@@ -53,7 +53,7 @@ public class CommonHttpServer {
         private ChannelHandlerAppender channelHandlerAppender;
 
         CommonHttpHandlerInitializer(ChannelHandlerAppender nextInitializer){
-            this.channelHandlerAppender = channelHandlerAppender;
+            this.channelHandlerAppender = nextInitializer;
         }
 
         @Override

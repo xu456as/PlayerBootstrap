@@ -32,7 +32,7 @@ public class HttpServerUrlHandler extends SimpleChannelInboundHandler<FullHttpRe
         this.defaultHandler = null;
     }
 
-    public HttpServerUrlHandler register(HttpMethod method, String uriPath, HttpRequestHandler handler){
+    public HttpServerUrlHandler register(String uriPath, HttpRequestHandler handler){
         handlerMap.put(uriPath, handler);
         return this;
     }
@@ -44,7 +44,7 @@ public class HttpServerUrlHandler extends SimpleChannelInboundHandler<FullHttpRe
         Map<String, List<String>> queryString = queryStringDecoder.parameters();
         HttpRequestHandler handler = handlerMap.getOrDefault(queryStringDecoder.path(), defaultHandler);
         if(handler == null) {
-            channelHandlerContext.writeAndFlush(RESPONSE_502);
+            channelHandlerContext.writeAndFlush(RESPONSE_502.retain());
             return;
         }
 
@@ -55,7 +55,7 @@ public class HttpServerUrlHandler extends SimpleChannelInboundHandler<FullHttpRe
             handler.post(channelHandlerContext, fullHttpRequest, queryString, requestBody);
         }
         else{
-            channelHandlerContext.writeAndFlush(RESPONSE_502);
+            channelHandlerContext.writeAndFlush(RESPONSE_502.retain());
         }
 
     }

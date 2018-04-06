@@ -16,11 +16,9 @@ public class HandlerInitializier implements ChannelHandlerAppender {
     public void handle(Channel channel) {
         HttpServerUrlHandler mainHandler = new HttpServerUrlHandler();
 
-        mainHandler.register(HttpMethod.POST, "/run_player", new PlayerBootstrapHandler());
+        mainHandler.register("/run_player", new PlayerBootstrapHandler());
 
         channel.pipeline()
-                .addLast(new HttpServerCodec())
-                .addLast(new HttpObjectAggregator(1024 * 5 * 1024))
                 .addLast(mainHandler);
     }
 }
