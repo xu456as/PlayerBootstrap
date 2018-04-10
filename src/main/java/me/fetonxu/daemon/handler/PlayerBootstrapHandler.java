@@ -9,13 +9,18 @@ import io.netty.buffer.UnpooledDirectByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.spdy.SpdyHeaders;
+import io.netty.util.concurrent.SingleThreadEventExecutor;
 import me.fetonxu.netty.handler.HttpRequestHandler;
 import me.fetonxu.netty.handler.HttpServerUrlHandler;
+import me.fetonxu.runtime.CommandLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 public class PlayerBootstrapHandler implements HttpRequestHandler {
 
@@ -26,7 +31,29 @@ public class PlayerBootstrapHandler implements HttpRequestHandler {
         System.out.println("Bootstrap a player");
 
         try {
-            String text = "阿地方法规更突出自行车";
+
+
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+
+            String text = "success";
+            if(CommandLine.existPort(9123)){
+                text = "port exists";
+            }
+            else{
+                executor.submit(new Runnable() {
+                    @Override public void run() {
+                        try {
+                            CommandLine.startPlayer(
+                                "/Users/fetonxu/Works/workspace/TankBackEnd/STank/start.sh", 9123, 0);
+                            logger.info("run_player success");
+                        }catch (Exception e){
+                            logger.error(String.format("run_player error, %s", e));
+                        }
+                    }
+                });
+            }
+
+
             byte[] bytes = text.getBytes("UTF-8");
 
             HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
