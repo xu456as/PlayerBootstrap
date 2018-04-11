@@ -53,8 +53,15 @@ public class CommandLine {
 
     public static String copyFile(String src, String dest) throws IOException{
         ProcessBuilder pBuilder = new ProcessBuilder("cp", "-r", src, dest);
-        pBuilder.directory(new File(System.getProperty("user.dir")));
+        pBuilder.directory(new File(DIRECTORY));
         System.out.println(pBuilder.directory().toString());
+        Process process = pBuilder.start();
+        return receiveOutput(process.getInputStream());
+    }
+
+    public static String compilePlayer(long userId) throws Exception{
+        String path = String.format("/data/tank/%d/build.xml", userId);
+        ProcessBuilder pBuilder = new ProcessBuilder("ant", "-buildfile", path, "compile");
         Process process = pBuilder.start();
         return receiveOutput(process.getInputStream());
     }
@@ -74,7 +81,7 @@ public class CommandLine {
     }
 
     public static void main(String[] args) throws Exception{
-        System.out.println(existPort(9123));
+        System.out.println(compilePlayer(1234));
 
     }
 }
