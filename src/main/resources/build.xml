@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="TankWar" default="compile" basedir=".">
+  <property name="src" value="src/main/java"/>
+  <property name="resources" value="src/main/resources" />
+  <property name="lib" value="lib" />
+  <property name="destClass" value="target/classes"/>
+  <property name="destLib" value="target/lib" />
+  <property name="dest" value="target" />
+  <target name="init">
+    <delete dir="${dest}" />
+    <mkdir dir="${destClass}"/>
+    <mkdir dir="${destLib}" />
+    <copy todir="${destLib}" >
+      <fileset dir="${lib}" />
+    </copy>
+    <copy todir="${destClass}" >
+      <fileset dir="${resources}"/>
+    </copy>
+  </target>                       
+  <target name="compile" depends="init">
+    <javac srcdir="${src}" destdir="${destClass}" target="1.8" encoding="UTF-8" >
+      <classpath>
+        <fileset dir="${destLib}" >
+          <include name="*.jar" />
+        </fileset>
+      </classpath>
+    </javac>
+  </target>
+  <target name="clean">
+    <delete dir="${dest}" /> 
+  </target>
+</project>
