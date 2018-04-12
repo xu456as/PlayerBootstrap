@@ -17,11 +17,6 @@ public class HttpServerUrlHandler extends SimpleChannelInboundHandler<FullHttpRe
 
     private final HttpRequestHandler defaultHandler;
 
-    public final static FullHttpResponse RESPONSE_502 = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
-            HttpResponseStatus.BAD_GATEWAY, ByteBufUtil.writeUtf8(ByteBufAllocator.DEFAULT, "Nothing to show"));
-    public final static FullHttpResponse RESPONSE_200 = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
-            HttpResponseStatus.OK, ByteBufUtil.writeUtf8(ByteBufAllocator.DEFAULT, "Connect successfully"));
-
     private Map<String, HttpRequestHandler> handlerMap = new HashMap<>();
 
     public HttpServerUrlHandler(HttpRequestHandler defaultHandler){
@@ -44,7 +39,8 @@ public class HttpServerUrlHandler extends SimpleChannelInboundHandler<FullHttpRe
         Map<String, List<String>> queryString = queryStringDecoder.parameters();
         HttpRequestHandler handler = handlerMap.getOrDefault(queryStringDecoder.path(), defaultHandler);
         if(handler == null) {
-            channelHandlerContext.writeAndFlush(RESPONSE_502.retain());
+            channelHandlerContext.writeAndFlush(new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
+                            HttpResponseStatus.BAD_GATEWAY, ByteBufUtil.writeUtf8(ByteBufAllocator.DEFAULT, "Nothing to show")));
             return;
         }
 
@@ -55,7 +51,8 @@ public class HttpServerUrlHandler extends SimpleChannelInboundHandler<FullHttpRe
             handler.post(channelHandlerContext, fullHttpRequest, queryString, requestBody);
         }
         else{
-            channelHandlerContext.writeAndFlush(RESPONSE_502.retain());
+            channelHandlerContext.writeAndFlush(new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
+                HttpResponseStatus.BAD_GATEWAY, ByteBufUtil.writeUtf8(ByteBufAllocator.DEFAULT, "Nothing to show")));
         }
 
     }

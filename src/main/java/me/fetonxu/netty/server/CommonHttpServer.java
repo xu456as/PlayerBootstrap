@@ -23,6 +23,8 @@ public class CommonHttpServer {
 
     private final EventLoopGroup bossGroup;
 
+    private final static int MAX_CONTENT_READ_LENGTH = 64 * 1024 * 1024;
+
     public CommonHttpServer(int port, int workerThreadCount, ChannelHandlerAppender appender){
         this.port = port;
         bossGroup = new NioEventLoopGroup(1);
@@ -59,7 +61,7 @@ public class CommonHttpServer {
         @Override
         protected void initChannel(Channel channel) throws Exception {
             channel.pipeline().addLast(new HttpServerCodec());
-            channel.pipeline().addLast(new HttpObjectAggregator(1024 * 1024 * 5));
+            channel.pipeline().addLast(new HttpObjectAggregator(MAX_CONTENT_READ_LENGTH));
             channelHandlerAppender.handle(channel);
         }
     }

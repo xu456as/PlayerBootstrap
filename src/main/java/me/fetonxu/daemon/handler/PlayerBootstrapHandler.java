@@ -94,6 +94,6 @@ public class PlayerBootstrapHandler implements HttpRequestHandler {
             logger.error(String.format("error: %s", e));
         }
 
-        ctx.writeAndFlush(HttpServerUrlHandler.RESPONSE_200);
+        ctx.writeAndFlush(new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK));
     }
 }

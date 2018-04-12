@@ -10,7 +10,9 @@ import java.util.Map;
 
 public interface HttpRequestHandler {
 
-    void get(ChannelHandlerContext context, HttpRequest request, Map<String, List<String>> queryStringMap);
+    void get(ChannelHandlerContext context, HttpRequest request,
+        Map<String, List<String>> queryStringMap) throws Exception;
 
-    void post(ChannelHandlerContext context, HttpRequest request, Map<String, List<String>> queryStringMap, ByteBuf requestBody);
+    void post(ChannelHandlerContext context, HttpRequest request,
+        Map<String, List<String>> queryStringMap, ByteBuf requestBody) throws Exception;
 }

@@ -80,8 +80,7 @@ public class CommandLine {
         return buffer.toString();
     }
 
-    public static void main(String[] args) throws Exception{
-        System.out.println(compilePlayer(1234));
-
-    }
+//    public static void main(String[] args) throws Exception{
+//        System.out.println(compilePlayer(1234));
+//    }
 }
