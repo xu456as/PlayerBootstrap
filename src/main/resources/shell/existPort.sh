@@ -4,7 +4,7 @@ PORT=$1
 result=' '
 result=$(lsof -i:$PORT|grep 'LISTEN')
 if [ -z "${result}" ]; then
-  echo 0
+  echo "0"
 else
-  echo 1
+  echo "1"
 fi

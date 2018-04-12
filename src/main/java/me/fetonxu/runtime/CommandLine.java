@@ -1,8 +1,7 @@
 package me.fetonxu.runtime;
 
 
-import jdk.nashorn.internal.runtime.ECMAException;
-import org.omg.PortableInterceptor.INACTIVE;
+import me.fetonxu.util.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,22 +13,21 @@ public class CommandLine {
 
     private final static String DIRECTORY = "src/main/resources";
 
-    public static String startPlayer(String absolutePath, int port, long userId) throws IOException{
+    public static String startPlayer(String path, int port) throws IOException{
 
-//        String cmd = String.format("%s %d", absolutePath, port);
-//
-//        Process process = Runtime.getRuntime().exec(cmd);
-//
-//        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-//
-//        String retVal = bufferedReader.readLine();
-//
-//        return retVal;
-
-        ProcessBuilder pBuilder = new ProcessBuilder(absolutePath, String.valueOf(port));
+        ProcessBuilder pBuilder = new ProcessBuilder(path, String.valueOf(port));
         Process process = pBuilder.start();
         return receiveOutput(process.getInputStream());
 
+    }
+
+    public static String reclaimPort(int port) throws Exception{
+        ProcessBuilder pBuilder = new ProcessBuilder("shell/reclaimPort.sh", String.valueOf(port));
+        pBuilder.directory(new File(DIRECTORY));
+        Process process = pBuilder.start();
+
+        String output = receiveOutput(process.getInputStream());
+        return output;
     }
 
     public static boolean existPort(int port)throws IOException, InterruptedException{
@@ -59,11 +57,29 @@ public class CommandLine {
         return receiveOutput(process.getInputStream());
     }
 
-    public static String compilePlayer(long userId) throws Exception{
-        String path = String.format("/data/tank/%d/build.xml", userId);
+    public static String compilePlayer(String path) throws Exception{
         ProcessBuilder pBuilder = new ProcessBuilder("ant", "-buildfile", path, "compile");
         Process process = pBuilder.start();
-        return receiveOutput(process.getInputStream());
+        return captureAntBuild(process.getInputStream());
+    }
+
+    private static String captureAntBuild(InputStream inputStream){
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        StringBuilder buffer = new StringBuilder();
+        String line = null;
+        boolean success = false;
+        try {
+            while ((line = reader.readLine()) != null) {
+                if(line.contains("SUCCESS")){
+                    success = true;
+                }
+                buffer.append(line).append('\n');
+            }
+        }catch (Exception e){
+            logger.error(String.format("Command line receive output error, %s", e));
+        }
+        String prefix = (success) ? "1" : "0";
+        return prefix + ";\n" + buffer.toString();
     }
 
     private static String receiveOutput(InputStream inputStream){
@@ -81,6 +97,6 @@ public class CommandLine {
     }
 
 //    public static void main(String[] args) throws Exception{
-//        System.out.println(compilePlayer(1234));
+//        System.out.println(reclaimPort(9999));
 //    }
 }

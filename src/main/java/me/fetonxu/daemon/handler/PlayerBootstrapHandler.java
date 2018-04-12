@@ -12,7 +12,9 @@ import io.netty.handler.codec.spdy.SpdyHeaders;
 import io.netty.util.concurrent.SingleThreadEventExecutor;
 import me.fetonxu.netty.handler.HttpRequestHandler;
 import me.fetonxu.netty.handler.HttpServerUrlHandler;
+import me.fetonxu.netty.util.ResponseUtil;
 import me.fetonxu.runtime.CommandLine;
+import me.fetonxu.util.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,74 +28,60 @@ public class PlayerBootstrapHandler implements HttpRequestHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(PlayerBootstrapHandler.class);
 
-    @Override
-    public void get(ChannelHandlerContext ctx, HttpRequest request, Map<String, List<String>> queryStringMap) {
-        System.out.println("Bootstrap a player");
-
-        try {
-
-
-            ExecutorService executor = Executors.newSingleThreadExecutor();
-
-            String text = "success";
-            if(CommandLine.existPort(9123)){
-                text = "port exists";
-            }
-            else{
-                executor.submit(new Runnable() {
-                    @Override public void run() {
-                        try {
-                            CommandLine.startPlayer(
-                                "/Users/fetonxu/Works/workspace/TankBackEnd/STank/start.sh", 9123, 0);
-                            logger.info("run_player success");
-                        }catch (Exception e){
-                            logger.error(String.format("run_player error, %s", e));
-                        }
-                    }
-                });
-            }
-
-
-            byte[] bytes = text.getBytes("UTF-8");
-
-            HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
-            response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/html;charset=UTF-8");
-            response.headers().set(HttpHeaderNames.TRANSFER_ENCODING, "chunked");
-            HttpContent httpContent = new DefaultHttpContent(Unpooled.wrappedBuffer(bytes));
-            LastHttpContent lastHttpContent = new DefaultLastHttpContent(Unpooled.wrappedBuffer(bytes));
-            ctx.writeAndFlush(response);
-            ctx.writeAndFlush(httpContent);
-            ctx.writeAndFlush(lastHttpContent);
-
-//            FullHttpResponse fullHttpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK,
-//                    Unpooled.wrappedBuffer(bytes));
-//            fullHttpResponse.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/html;charset=UTF-8");
-//            fullHttpResponse.headers().set(HttpHeaderNames.CONTENT_LENGTH, bytes.length);
-//            ctx.writeAndFlush(fullHttpResponse);
-        }catch (Exception e){
-//            ctx.writeAndFlush(HttpServerUrlHandler.RESPONSE_502);
-            logger.error(String.format("error: %s", e));
-        }
-
+    @Override public void get(ChannelHandlerContext ctx, HttpRequest request,
+        Map<String, List<String>> queryStringMap) throws Exception {
+        ctx.writeAndFlush(
+            ResponseUtil.simpleResponse(HttpResponseStatus.BAD_GATEWAY, "0;method not support"));
     }
 
-    @Override
-    public void post(ChannelHandlerContext ctx, HttpRequest request, Map<String, List<String>> queryStringMap, ByteBuf requestBody) {
-        System.out.println("Bootstrap a player");
+    @Override public void post(ChannelHandlerContext ctx, HttpRequest request,
+        Map<String, List<String>> queryStringMap, ByteBuf requestBody) throws Exception {
 
-        byte[] originBytes = ByteBufUtil.getBytes(requestBody);
-
+        String responseString = "0;default";
         try {
-            Map map = JSON.parseObject(new String(originBytes, "UTF-8"), Map.class);
 
-            int port = Integer.parseInt((String)map.get("port"));
-            long userId = Long.parseLong((String)map.get("userId"));
+            int port = Integer.parseInt(queryStringMap.get("port").get(0));
+            long userId = Long.parseLong(queryStringMap.get("userId").get(0));
+            logger.info(String.format("bootstrap player, userId: %d, port: %d", userId, port));
 
+            String startDest = Config.getString("repository.path") + "/" + userId + "/start.sh";
 
-        }catch (Exception e){
+            CommandLine.copyFile("shell/start.sh", startDest);
+
+            if(CommandLine.existPort(port)){
+                responseString = "0;port occupied";
+            }
+            else{
+                daemonRun(startDest, port);
+                Thread.sleep(3000);
+                if(CommandLine.existPort(port)){
+                    responseString = "1;success";
+                }
+                else{
+                    responseString = "0;operation fail";
+                }
+            }
+
+        } catch (Exception e) {
             logger.error(String.format("error: %s", e));
+            responseString = "0;error";
         }
 
-        ctx.writeAndFlush(new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK));
+        ctx.writeAndFlush(ResponseUtil.simpleResponse(HttpResponseStatus.OK, responseString));
+    }
+
+    private static void daemonRun(String path, int port){
+
+        ExecutorService threadpool = Executors.newSingleThreadExecutor();
+        threadpool.submit(new Runnable() {
+            @Override public void run() {
+                try {
+                    CommandLine.startPlayer(path, port);
+                }catch (Exception e){
+                    logger.error(String.format("start player error: %s", e));
+                }
+            }
+        });
+
     }
 }

@@ -1,9 +1,7 @@
 package me.fetonxu.daemon.handler;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.ByteBufUtil;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.*;
 import me.fetonxu.netty.handler.HttpRequestHandler;
@@ -16,16 +14,14 @@ import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.nio.channels.Channel;
-import java.nio.channels.FileChannel;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-public class FileUploadHandler implements HttpRequestHandler {
+public class PlayerUploadHandler implements HttpRequestHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(FileUploadHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(PlayerUploadHandler.class);
 
     private static final int ZIP_READ_COUNT = 4 * 1024 * 1024;
 
@@ -39,10 +35,11 @@ public class FileUploadHandler implements HttpRequestHandler {
     }
 
     @Override public void post(ChannelHandlerContext ctx, HttpRequest request,
-        Map<String, List<String>> queryStringMap, ByteBuf requestBody) {
+        Map<String, List<String>> queryStringMap, ByteBuf requestBody) throws Exception {
 
         long userId = -1;
         String encoding = null;
+        String responseString = "0;default";
         try {
             userId = Long.parseLong(queryStringMap.get("userId").get(0));
             encoding = queryStringMap.get("encoding").get(0);
@@ -52,16 +49,16 @@ public class FileUploadHandler implements HttpRequestHandler {
             String basePath = Config.getString("repository.path") + "/" + userId;
             if(encoding.equals("zip")) {
                 upLoadZipFiles(basePath, requestBody);
-                ctx.writeAndFlush(ResponseUtil.simpleResponse(HttpResponseStatus.OK, "1;success"));
+                responseString = "1;success";
             }
             else{
-                ctx.writeAndFlush(ResponseUtil.simpleResponse(HttpResponseStatus.OK, "0;encoding not support"));
+                responseString = "0;encoding not support";
             }
 
         } catch (Exception e) {
             logger.error(String.format("error: %s", e));
         }
-
+        ctx.writeAndFlush(ResponseUtil.simpleResponse(HttpResponseStatus.OK, responseString));
     }
 
     private static void upLoadZipFiles(String destBasePath, ByteBuf content) throws Exception{
