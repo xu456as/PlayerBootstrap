@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<project name="TankWar" default="compile" basedir="../">
+<project name="TankWar" default="compile" basedir="./">
   <property name="src" value="src/main/java"/>
   <property name="resources" value="src/main/resources" />
   <property name="lib" value="lib" />

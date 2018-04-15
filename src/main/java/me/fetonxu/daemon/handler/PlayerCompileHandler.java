@@ -34,7 +34,7 @@ public class PlayerCompileHandler implements HttpRequestHandler {
             long userId = Long.parseLong(queryStringMap.get("userId").get(0));
             logger.info(String.format("compile player, userId: %d", userId));
 
-            String buildDest = Config.getString("repository.path") + "/" + userId + "/shell/build.xml";
+            String buildDest = Config.getString("repository.path") + "/" + userId + "/build.xml";
             CommandLine.copyFile("shell/build.xml", buildDest);
             info = CommandLine.compilePlayer(buildDest);
 
