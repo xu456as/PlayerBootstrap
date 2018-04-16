@@ -30,7 +30,8 @@ public class PlayerUploadHandler implements HttpRequestHandler {
 
         System.out.println("fileUploadHandler get");
 
-        ctx.writeAndFlush(ResponseUtil.simpleResponse(HttpResponseStatus.BAD_GATEWAY, "0;method not support"));
+        ctx.writeAndFlush(
+            ResponseUtil.simpleResponse(HttpResponseStatus.BAD_GATEWAY, "0;method not support"));
 
     }
 
@@ -38,20 +39,21 @@ public class PlayerUploadHandler implements HttpRequestHandler {
         Map<String, List<String>> queryStringMap, ByteBuf requestBody) throws Exception {
 
         long userId = -1;
+        long timestamp = 0;
         String encoding = null;
         String responseString = "0;default";
         try {
             userId = Long.parseLong(queryStringMap.get("userId").get(0));
+            timestamp = Long.parseLong(queryStringMap.get("timestamp").get(0));
             encoding = queryStringMap.get("encoding").get(0);
 
             logger.info(String.format("fileUploadHandler post, userId:%d.", userId));
 
-            String basePath = Config.getString("repository.path") + "/" + userId;
-            if(encoding.equals("zip")) {
+            String basePath = Config.getString("repository.path") + "/" + userId + "-" + timestamp;
+            if (encoding.equals("zip")) {
                 upLoadZipFiles(basePath, requestBody);
                 responseString = "1;success";
-            }
-            else{
+            } else {
                 responseString = "0;encoding not support";
             }
 
@@ -61,13 +63,12 @@ public class PlayerUploadHandler implements HttpRequestHandler {
         ctx.writeAndFlush(ResponseUtil.simpleResponse(HttpResponseStatus.OK, responseString));
     }
 
-    private static void upLoadZipFiles(String destBasePath, ByteBuf content) throws Exception{
+    private static void upLoadZipFiles(String destBasePath, ByteBuf content) throws Exception {
         File baseDir = new File(destBasePath);
         baseDir.mkdirs();
 
         try (ZipInputStream zis = new ZipInputStream(
-            new ByteArrayInputStream(ByteBufUtil.getBytes(content)));
-        ) {
+            new ByteArrayInputStream(ByteBufUtil.getBytes(content)));) {
             ZipEntry entry;
             byte[] data = new byte[ZIP_READ_COUNT];
             while ((entry = zis.getNextEntry()) != null) {
@@ -77,8 +78,7 @@ public class PlayerUploadHandler implements HttpRequestHandler {
                 } else {
                     file.createNewFile();
                     try (BufferedOutputStream outputStream = new BufferedOutputStream(
-                        new FileOutputStream(file));
-                    ) {
+                        new FileOutputStream(file));) {
                         int len = -1;
                         while ((len = zis.read(data, 0, ZIP_READ_COUNT)) != -1) {
                             outputStream.write(data, 0, len);

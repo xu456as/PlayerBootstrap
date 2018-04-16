@@ -42,22 +42,22 @@ public class PlayerBootstrapHandler implements HttpRequestHandler {
 
             int port = Integer.parseInt(queryStringMap.get("port").get(0));
             long userId = Long.parseLong(queryStringMap.get("userId").get(0));
+            long timestamp = Long.parseLong(queryStringMap.get("timestamp").get(0));
             logger.info(String.format("bootstrap player, userId: %d, port: %d", userId, port));
 
-            String startDest = Config.getString("repository.path") + "/" + userId + "/start.sh";
+            String startDest =
+                Config.getString("repository.path") + "/" + userId + "-" + timestamp + "/start.sh";
 
             CommandLine.copyFile("shell/start.sh", startDest);
 
-            if(CommandLine.existPort(port)){
+            if (CommandLine.existPort(port)) {
                 responseString = "0;port occupied";
-            }
-            else{
+            } else {
                 daemonRun(startDest, port);
                 Thread.sleep(3000);
-                if(CommandLine.existPort(port)){
+                if (CommandLine.existPort(port)) {
                     responseString = "1;success";
-                }
-                else{
+                } else {
                     responseString = "0;operation fail";
                 }
             }
@@ -70,14 +70,14 @@ public class PlayerBootstrapHandler implements HttpRequestHandler {
         ctx.writeAndFlush(ResponseUtil.simpleResponse(HttpResponseStatus.OK, responseString));
     }
 
-    private static void daemonRun(String path, int port){
+    private static void daemonRun(String path, int port) {
 
         ExecutorService threadpool = Executors.newSingleThreadExecutor();
         threadpool.submit(new Runnable() {
             @Override public void run() {
                 try {
                     CommandLine.startPlayer(path, port);
-                }catch (Exception e){
+                } catch (Exception e) {
                     logger.error(String.format("start player error: %s", e));
                 }
             }

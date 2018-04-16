@@ -32,17 +32,18 @@ public class PlayerCompileHandler implements HttpRequestHandler {
         try {
 
             long userId = Long.parseLong(queryStringMap.get("userId").get(0));
+            long timestamp = Long.parseLong(queryStringMap.get("timestamp").get(0));
             logger.info(String.format("compile player, userId: %d", userId));
 
-            String buildDest = Config.getString("repository.path") + "/" + userId + "/build.xml";
+            String buildDest =
+                Config.getString("repository.path") + "/" + userId + "-" + timestamp + "/build.xml";
             CommandLine.copyFile("shell/build.xml", buildDest);
             info = CommandLine.compilePlayer(buildDest);
 
         } catch (Exception e) {
             logger.error("error: %s", e);
         }
-        context.writeAndFlush(
-            ResponseUtil.simpleResponse(HttpResponseStatus.OK, info));
+        context.writeAndFlush(ResponseUtil.simpleResponse(HttpResponseStatus.OK, info));
 
     }
 }
