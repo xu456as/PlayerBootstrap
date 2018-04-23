@@ -38,18 +38,18 @@ public class PlayerUploadHandler implements HttpRequestHandler {
     @Override public void post(ChannelHandlerContext ctx, HttpRequest request,
         Map<String, List<String>> queryStringMap, ByteBuf requestBody) throws Exception {
 
-        long userId = -1;
+        long projectId = -1;
         long timestamp = 0;
         String encoding = null;
         String responseString = "0;default";
         try {
-            userId = Long.parseLong(queryStringMap.get("userId").get(0));
+            projectId = Long.parseLong(queryStringMap.get("userId").get(0));
             timestamp = Long.parseLong(queryStringMap.get("timestamp").get(0));
             encoding = queryStringMap.get("encoding").get(0);
 
-            logger.info(String.format("fileUploadHandler post, userId:%d.", userId));
+            logger.info(String.format("fileUploadHandler post, projectId:%d.", projectId));
 
-            String basePath = Config.getString("repository.path") + "/" + userId + "-" + timestamp;
+            String basePath = Config.getString("repository.path") + "/" + projectId + "-" + timestamp;
             if (encoding.equals("zip")) {
                 upLoadZipFiles(basePath, requestBody);
                 responseString = "1;success";

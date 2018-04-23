@@ -31,12 +31,12 @@ public class PlayerCompileHandler implements HttpRequestHandler {
 
         try {
 
-            long userId = Long.parseLong(queryStringMap.get("userId").get(0));
+            long projectId = Long.parseLong(queryStringMap.get("projectId").get(0));
             long timestamp = Long.parseLong(queryStringMap.get("timestamp").get(0));
-            logger.info(String.format("compile player, userId: %d", userId));
+            logger.info(String.format("compile player, projectId: %d", projectId));
 
             String buildDest =
-                Config.getString("repository.path") + "/" + userId + "-" + timestamp + "/build.xml";
+                Config.getString("repository.path") + "/" + projectId + "-" + timestamp + "/build.xml";
             CommandLine.copyFile("shell/build.xml", buildDest);
             info = CommandLine.compilePlayer(buildDest);
 

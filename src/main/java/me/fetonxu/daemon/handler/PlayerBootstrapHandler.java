@@ -41,12 +41,12 @@ public class PlayerBootstrapHandler implements HttpRequestHandler {
         try {
 
             int port = Integer.parseInt(queryStringMap.get("port").get(0));
-            long userId = Long.parseLong(queryStringMap.get("userId").get(0));
+            long projectId = Long.parseLong(queryStringMap.get("projectId").get(0));
             long timestamp = Long.parseLong(queryStringMap.get("timestamp").get(0));
-            logger.info(String.format("bootstrap player, userId: %d, port: %d", userId, port));
+            logger.info(String.format("bootstrap player, projectId: %d, port: %d", projectId, port));
 
             String startDest =
-                Config.getString("repository.path") + "/" + userId + "-" + timestamp + "/start.sh";
+                Config.getString("repository.path") + "/" + projectId + "-" + timestamp + "/start.sh";
 
             CommandLine.copyFile("shell/start.sh", startDest);
 
