@@ -43,7 +43,7 @@ public class PlayerUploadHandler implements HttpRequestHandler {
         String encoding = null;
         String responseString = "0;default";
         try {
-            projectId = Long.parseLong(queryStringMap.get("userId").get(0));
+            projectId = Long.parseLong(queryStringMap.get("projectId").get(0));
             timestamp = Long.parseLong(queryStringMap.get("timestamp").get(0));
             encoding = queryStringMap.get("encoding").get(0);
 

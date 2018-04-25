@@ -9,10 +9,10 @@ public class HandlerInitializier implements ChannelHandlerAppender {
     @Override public void handle(Channel channel) {
         HttpServerUrlHandler mainHandler = new HttpServerUrlHandler();
 
-        mainHandler.register("/run_player", new PlayerBootstrapHandler())
-            .register("/upload_player", new PlayerUploadHandler())
+        mainHandler.register("/run_project", new PlayerBootstrapHandler())
+            .register("/upload_project", new PlayerUploadHandler())
             .register("/port_operation", new PortOperationHandler())
-            .register("/compile_player", new PlayerCompileHandler());
+            .register("/compile_project", new PlayerCompileHandler());
 
         channel.pipeline().addLast(mainHandler);
     }
